@@ -11,7 +11,8 @@
     "nodejs"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run lint && node test.js",
+    "lint": "standard"
   },
   "author": "RafaelGSS <rafael.nunu@hotmail.com>",
   "license": "MIT",
@@ -20,5 +21,8 @@
     "debug": "^4.3.4",
     "semver": "^7.3.8",
     "undici": "^5.15.1"
+  },
+  "devDependencies": {
+    "standard": "^17.0.0"
   }
 }
