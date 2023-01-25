@@ -52,7 +52,7 @@ async function getCoreIndex() {
     debug('Creating local core.json');
     return fetchCoreIndex();
   } else {
-    debug('No updates from upstream. Getting a cached version.');
+    debug(`No updates from upstream. Getting a cached version: ${coreLocalFile}`);
     return readLocal(coreLocalFile);
   }
 }
