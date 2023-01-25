@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const { request, stream, setGlobalDispatcher, Agent } = require('undici');
 const EE = require('node:events');
 const fs = require('node:fs');
