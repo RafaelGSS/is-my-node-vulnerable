@@ -7,5 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "RafaelGSS",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "semver": "^7.3.8",
+    "undici": "^5.15.1"
+  }
 }
