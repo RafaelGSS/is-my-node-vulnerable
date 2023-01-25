@@ -1,12 +1,19 @@
 {
   "name": "is-my-node-vulnerable",
   "version": "1.0.0-0",
-  "description": "",
+  "description": "package that checks if your Node.js installation is vulnerable to known security vulnerabilities",
   "main": "index.js",
+  "bin": {
+    "is-my-node-vulnerable": "./index.js"
+  },
+  "keywords": [
+    "security",
+    "nodejs"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "RafaelGSS",
+  "author": "RafaelGSS <rafael.nunu@hotmail.com>",
   "license": "MIT",
   "dependencies": {
     "cli-color": "^2.0.3",
