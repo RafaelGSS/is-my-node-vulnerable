@@ -9,6 +9,8 @@
   "author": "RafaelGSS",
   "license": "MIT",
   "dependencies": {
+    "cli-color": "^2.0.3",
+    "debug": "^4.3.4",
     "semver": "^7.3.8",
     "undici": "^5.15.1"
   }

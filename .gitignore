@@ -123,3 +123,6 @@ dist
 
 tags
 tags.*
+
+.etag
+core.json
