@@ -23,6 +23,7 @@ async function readLocal (file) {
 
 function loadETag () {
   if (fs.existsSync(ETagFile)) {
+    debug('Loading local ETag')
     lastETagValue = fs.readFileSync(ETagFile).toString()
   }
 }
@@ -47,7 +48,7 @@ async function fetchCoreIndex () {
 
 async function getCoreIndex () {
   const { headers } = await request(CORE_RAW_URL, { method: 'HEAD' })
-  if (!lastETagValue || lastETagValue !== headers.etag) {
+  if (!lastETagValue || lastETagValue !== headers.etag || !fs.existsSync(coreLocalFile)) {
     updateLastETag(headers.etag)
     debug('Creating local core.json')
     return fetchCoreIndex()
@@ -72,10 +73,6 @@ function getVulnerabilityList (currentVersion, data) {
 }
 
 async function main (currentVersion) {
-  if (process.argv[2] !== '-r') {
-    debug('Loading local ETag')
-    loadETag()
-  }
   const coreIndex = await getCoreIndex()
   const list = getVulnerabilityList(currentVersion, coreIndex)
   if (list.length) {
@@ -94,8 +91,13 @@ async function isNodeVulnerable (version) {
   return list.length > 0
 }
 
+if (process.argv[2] !== '-r') {
+  loadETag()
+}
+
 // CLI
 if (require.main === module) {
+  console.log('calling from main')
   main(process.version)
 } else {
   module.exports = {
