@@ -97,7 +97,6 @@ if (process.argv[2] !== '-r') {
 
 // CLI
 if (require.main === module) {
-  console.log('calling from main')
   main(process.version)
 } else {
   module.exports = {
