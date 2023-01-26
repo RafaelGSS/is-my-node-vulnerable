@@ -7,6 +7,7 @@ const path = require('path')
 const debug = require('debug')('is-my-node-vulnerable')
 const satisfies = require('semver/functions/satisfies')
 const { danger, vulnerableWarning, bold, separator, allGood } = require('./ascii')
+const nv = require('@pkgjs/nv')
 
 setGlobalDispatcher(new Agent({ connections: 20 }))
 
@@ -73,6 +74,13 @@ function getVulnerabilityList (currentVersion, data) {
 }
 
 async function main (currentVersion) {
+  const isEOL = await isNodeEOL(currentVersion)
+  if (isEOL) {
+    console.error(danger)
+    console.error(`${currentVersion} is end-of-life. There are high chances of being vulnerable. Please upgrade it.`)
+    process.exit(1)
+  }
+
   const coreIndex = await getCoreIndex()
   const list = getVulnerabilityList(currentVersion, coreIndex)
   if (list.length) {
@@ -85,7 +93,34 @@ async function main (currentVersion) {
   }
 }
 
+/**
+ * @param {string} version
+ * @returns {Promise<boolean>} true if the version is end-of-life
+ */
+async function isNodeEOL (version) {
+  const myVersionInfo = await nv(version)
+  if (!myVersionInfo) {
+    // i.e. isNodeEOL('abcd')
+    throw Error(`Could not fetch version information for ${version}`)
+  } else if (myVersionInfo.length !== 1) {
+    // i.e. isNodeEOL('lts') or isNodeEOL('99')
+    throw Error(`Did not get exactly one version record for ${version}`)
+  } else if (!myVersionInfo[0].end) {
+    // We got a record, but..
+    // v0.12.18 etc does not have an EOL date, which probably means too old.
+    return true
+  }
+  const now = new Date()
+  const end = new Date(myVersionInfo[0].end)
+  return now > end
+}
+
 async function isNodeVulnerable (version) {
+  const isEOL = await isNodeEOL(version)
+  if (isEOL) {
+    return true
+  }
+
   const coreIndex = await getCoreIndex()
   const list = getVulnerabilityList(version, coreIndex)
   return list.length > 0
