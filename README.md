@@ -51,6 +51,17 @@ $ npx is-my-node-vulnerable
 
 ```
 
+### Output - when unsupported
+
+```console
+$ node -v
+v17.9.1
+$ npx is-my-node-vulnerable
+Not an actively supported Node.js version: v17.9.1
+```
+
+Vulnerability information is only valid for actively supported Node.js versions.
+
 ## API
 
 This package also exports a function `isNodeVulnerable` to perform the check in runtime

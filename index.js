@@ -6,7 +6,9 @@ const fs = require('fs')
 const path = require('path')
 const debug = require('debug')('is-my-node-vulnerable')
 const satisfies = require('semver/functions/satisfies')
+const parse = require('semver/functions/parse');
 const { danger, vulnerableWarning, bold, separator, allGood } = require('./ascii')
+const nv = require('@pkgjs/nv')
 
 setGlobalDispatcher(new Agent({ connections: 20 }))
 
@@ -73,6 +75,11 @@ function getVulnerabilityList (currentVersion, data) {
 }
 
 async function main (currentVersion) {
+  const isSupported = await isNodeSupportedMajor(currentVersion)
+  if (!isSupported) {
+    console.error(`Not an actively supported Node.js version: ${currentVersion}`);
+    process.exit(1);
+  }
   const coreIndex = await getCoreIndex()
   const list = getVulnerabilityList(currentVersion, coreIndex)
   if (list.length) {
@@ -83,6 +90,21 @@ async function main (currentVersion) {
   } else {
     console.info(allGood)
   }
+}
+
+/**
+ * get the currently supported Node versions
+ * @returns Promise<VersionInfo[]>
+ */
+function supportedVersions() {
+  return nv(['supported']);
+}
+
+async function isNodeSupportedMajor(version) {
+  const versions = await supportedVersions();
+  const majors = versions.map(v => v.major);
+  const myVersion = parse(version);
+  return (majors.indexOf(myVersion.major) !== -1);
 }
 
 async function isNodeVulnerable (version) {
