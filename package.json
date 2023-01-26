@@ -15,6 +15,10 @@
     "lint": "standard"
   },
   "author": "RafaelGSS <rafael.nunu@hotmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RafaelGSS/is-my-node-vulnerable"
+  },
   "license": "MIT",
   "dependencies": {
     "cli-color": "^2.0.3",
