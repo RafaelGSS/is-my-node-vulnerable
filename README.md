@@ -51,6 +51,24 @@ $ npx is-my-node-vulnerable
 
 ```
 
+### Output - when end of life
+
+```console
+$ node -v
+v15.14.0
+$ npx is-my-node-vulnerable
+██████   █████  ███    ██  ██████  ███████ ██████
+██   ██ ██   ██ ████   ██ ██       ██      ██   ██
+██   ██ ███████ ██ ██  ██ ██   ███ █████   ██████
+██   ██ ██   ██ ██  ██ ██ ██    ██ ██      ██   ██
+██████  ██   ██ ██   ████  ██████  ███████ ██   ██
+
+
+v15.14.0 is end-of-life. There are high chances of being vulnerable. Please upgrade it.
+```
+
+End-of-Life versions don't keep track of recent security releases, therefore, it's considered vulnerable by default.
+
 ## API
 
 This package also exports a function `isNodeVulnerable` to perform the check in runtime
