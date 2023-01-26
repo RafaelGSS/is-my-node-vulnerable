@@ -40,7 +40,7 @@ async function fetchCoreIndex () {
       abortRequest.emit('abort')
       process.nextTick(() => { process.exit(1) })
     }
-    return fs.createWriteStream(coreLocalFile, { flags: 'w' })
+    return fs.createWriteStream(coreLocalFile, { flags: 'w', autoClose: true })
   })
   return readLocal(coreLocalFile)
 }
@@ -72,7 +72,7 @@ function getVulnerabilityList (currentVersion, data) {
 }
 
 async function main (currentVersion) {
-  if (process.argv[2] !== '-c') {
+  if (process.argv[2] !== '-r') {
     debug('Loading local ETag')
     loadETag()
   }
