@@ -100,7 +100,7 @@ async function main (currentVersion) {
  * get the currently supported Node versions
  * @returns Promise<VersionInfo[]>
  */
-function supportedVersions() {
+function supportedVersions () {
   return nv(['supported'])
 }
 
@@ -108,13 +108,13 @@ function supportedVersions() {
  * @param {string} version
  * @returns {Promise<number[]>} true if this version is a supported major version
  */
-async function supportedMajorVersions() {
+async function supportedMajorVersions () {
   const versions = await supportedVersions()
   const majors = versions.map(v => v.major)
   return majors
 }
 
-async function minSupportedMajorVersion() {
+async function minSupportedMajorVersion () {
   const majors = await supportedMajorVersions()
   return majors.reduce((p, v) => Math.min(p || v, p))
 }
@@ -123,7 +123,7 @@ async function minSupportedMajorVersion() {
  * @param {string} version
  * @returns {Promise<boolean>} true if this version is a supported major version
  */
-async function isNodeSupportedMajor(version) {
+async function isNodeSupportedMajor (version) {
   const majors = await supportedMajorVersions()
   const myVersion = parse(version)
   return (majors.indexOf(myVersion.major) !== -1)
@@ -133,7 +133,7 @@ async function isNodeSupportedMajor(version) {
  * @param {string} version
  * @returns {Promise<boolean>} true if this version's major is less than the minimum supported major
  */
-async function isNodeDefinitelyEOL(version) {
+async function isNodeDefinitelyEOL (version) {
   const minMajor = await minSupportedMajorVersion()
   const myVersion = parse(version)
   return (myVersion.major < minMajor)
