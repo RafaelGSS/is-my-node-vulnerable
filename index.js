@@ -6,7 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const debug = require('debug')('is-my-node-vulnerable')
 const satisfies = require('semver/functions/satisfies')
-const parse = require('semver/functions/parse');
+const parse = require('semver/functions/parse')
 const { danger, vulnerableWarning, bold, separator, allGood } = require('./ascii')
 const nv = require('@pkgjs/nv')
 
@@ -76,9 +76,13 @@ function getVulnerabilityList (currentVersion, data) {
 
 async function main (currentVersion) {
   const isSupported = await isNodeSupportedMajor(currentVersion)
-  if (!isSupported) {
-    console.error(`Not an actively supported Node.js version: ${currentVersion}`);
-    process.exit(1);
+  const isDefinitelyEOL = await isNodeDefinitelyEOL(currentVersion)
+  if (isDefinitelyEOL) {
+    console.error(`${currentVersion} is end-of-life. There are high chances of being vulnerable. Please upgrade it.`)
+    process.exit(1)
+  } else if (!isSupported) {
+    console.error(`You may be at risk. ${currentVersion} is not an actively supported Node.js version, so unable to check vulnerabilities.`)
+    process.exit(1)
   }
   const coreIndex = await getCoreIndex()
   const list = getVulnerabilityList(currentVersion, coreIndex)
@@ -97,14 +101,42 @@ async function main (currentVersion) {
  * @returns Promise<VersionInfo[]>
  */
 function supportedVersions() {
-  return nv(['supported']);
+  return nv(['supported'])
 }
 
+/**
+ * @param {string} version
+ * @returns {Promise<number[]>} true if this version is a supported major version
+ */
+async function supportedMajorVersions() {
+  const versions = await supportedVersions()
+  const majors = versions.map(v => v.major)
+  return majors
+}
+
+async function minSupportedMajorVersion() {
+  const majors = await supportedMajorVersions()
+  return majors.reduce((p, v) => Math.min(p || v, p))
+}
+
+/**
+ * @param {string} version
+ * @returns {Promise<boolean>} true if this version is a supported major version
+ */
 async function isNodeSupportedMajor(version) {
-  const versions = await supportedVersions();
-  const majors = versions.map(v => v.major);
-  const myVersion = parse(version);
-  return (majors.indexOf(myVersion.major) !== -1);
+  const majors = await supportedMajorVersions()
+  const myVersion = parse(version)
+  return (majors.indexOf(myVersion.major) !== -1)
+}
+
+/**
+ * @param {string} version
+ * @returns {Promise<boolean>} true if this version's major is less than the minimum supported major
+ */
+async function isNodeDefinitelyEOL(version) {
+  const minMajor = await minSupportedMajorVersion()
+  const myVersion = parse(version)
+  return (myVersion.major < minMajor)
 }
 
 async function isNodeVulnerable (version) {
