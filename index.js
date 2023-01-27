@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 const { request, stream, setGlobalDispatcher, Agent } = require('undici')
-const EE = require('node:events')
-const fs = require('node:fs')
-const path = require('node:path')
+const EE = require('events')
+const fs = require('fs')
+const path = require('path')
 const debug = require('debug')('is-my-node-vulnerable')
 const satisfies = require('semver/functions/satisfies')
 const { danger, vulnerableWarning, bold, separator, allGood } = require('./ascii')
