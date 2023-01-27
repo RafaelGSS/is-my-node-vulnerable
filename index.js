@@ -76,8 +76,9 @@ function getVulnerabilityList (currentVersion, data) {
 
 async function main (currentVersion) {
   const isSupported = await isNodeSupportedMajor(currentVersion)
-  const isDefinitelyEOL = await isNodeDefinitelyEOL(currentVersion)
-  if (isDefinitelyEOL) {
+  const isEOL = await isNodeEOL(currentVersion)
+  if (isEOL) {
+    console.error(danger)
     console.error(`${currentVersion} is end-of-life. There are high chances of being vulnerable. Please upgrade it.`)
     process.exit(1)
   } else if (!isSupported) {
@@ -114,11 +115,6 @@ async function supportedMajorVersions () {
   return majors
 }
 
-async function minSupportedMajorVersion () {
-  const majors = await supportedMajorVersions()
-  return majors.reduce((p, v) => Math.min(p || v, p))
-}
-
 /**
  * @param {string} version
  * @returns {Promise<boolean>} true if this version is a supported major version
@@ -133,10 +129,25 @@ async function isNodeSupportedMajor (version) {
  * @param {string} version
  * @returns {Promise<boolean>} true if this version's major is less than the minimum supported major
  */
-async function isNodeDefinitelyEOL (version) {
-  const minMajor = await minSupportedMajorVersion()
-  const myVersion = parse(version)
-  return (myVersion.major < minMajor)
+async function isNodeEOL (version) {
+  const myVersionInfo = await nv(version)
+  if (!myVersionInfo) {
+    // i.e. isNodeEOL('abcd')
+    throw Error(`Could not fetch version information for ${version}`)
+  } else if (myVersionInfo.length !== 1) {
+    // i.e. isNodeEOL('lts') or isNodeEOL('99')
+    throw Error(`Did not get exactly one version record for ${version}`)
+  } else if (!myVersionInfo[0].end) {
+    // We got a record, but..
+    // v0.12.18 etc does not have an EOL date, which probably means too old.
+    return true
+  }
+  const now = new Date()
+  const end = new Date(myVersionInfo[0].end)
+  if (now > end) {
+    return true
+  }
+  return false
 }
 
 async function isNodeVulnerable (version) {
@@ -155,7 +166,7 @@ if (require.main === module) {
 } else {
   module.exports = {
     isNodeVulnerable,
-    isNodeDefinitelyEOL,
+    isNodeEOL,
     isNodeSupportedMajor
   }
 }

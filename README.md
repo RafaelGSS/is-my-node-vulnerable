@@ -51,16 +51,23 @@ $ npx is-my-node-vulnerable
 
 ```
 
-### Output - when unsupported
+### Output - when end of life
 
 ```console
 $ node -v
-v17.9.1
+v15.14.0
 $ npx is-my-node-vulnerable
-Not an actively supported Node.js version: v17.9.1
+██████   █████  ███    ██  ██████  ███████ ██████
+██   ██ ██   ██ ████   ██ ██       ██      ██   ██
+██   ██ ███████ ██ ██  ██ ██   ███ █████   ██████
+██   ██ ██   ██ ██  ██ ██ ██    ██ ██      ██   ██
+██████  ██   ██ ██   ████  ██████  ███████ ██   ██
+
+
+v15.14.0 is end-of-life. There are high chances of being vulnerable. Please upgrade it.
 ```
 
-Vulnerability information is only valid for actively supported Node.js versions.
+End-of-Life versions don't keep track of recent security releases, therefore, it's considered vulnerable by default.
 
 ## API
 
