@@ -154,6 +154,8 @@ if (require.main === module) {
   main(process.version)
 } else {
   module.exports = {
-    isNodeVulnerable
+    isNodeVulnerable,
+    isNodeDefinitelyEOL,
+    isNodeSupportedMajor
   }
 }
