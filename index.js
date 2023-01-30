@@ -144,10 +144,7 @@ async function isNodeEOL (version) {
   }
   const now = new Date()
   const end = new Date(myVersionInfo[0].end)
-  if (now > end) {
-    return true
-  }
-  return false
+  return now > end
 }
 
 async function isNodeVulnerable (version) {
