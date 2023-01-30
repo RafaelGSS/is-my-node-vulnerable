@@ -127,7 +127,7 @@ async function isNodeSupportedMajor (version) {
 
 /**
  * @param {string} version
- * @returns {Promise<boolean>} true if this version's major is less than the minimum supported major
+ * @returns {Promise<boolean>} true if the version is end-of-life
  */
 async function isNodeEOL (version) {
   const myVersionInfo = await nv(version)
