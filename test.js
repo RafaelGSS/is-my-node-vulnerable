@@ -7,6 +7,9 @@ async function t () {
   assert.ok(await isNodeVulnerable('18.0.0'))
   assert.ok(await isNodeVulnerable('14.0.0'))
   assert.ok(await isNodeVulnerable('16.0.0'))
+  assert.ok(await isNodeVulnerable('19.6.0'))
+  assert.ok(await isNodeVulnerable('18.14.0'))
+  assert.ok(await isNodeVulnerable('16.19.0'))
 
   assert.rejects(() => isNodeVulnerable('lts'), /not get exactly one version/)
   assert.rejects(() => isNodeVulnerable('999'), /not get exactly one version/)
