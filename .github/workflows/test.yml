@@ -28,3 +28,7 @@ jobs:
       - name: Run validator
         run: |
           npm run test
+
+      - name: Ensure Build
+        run: |
+          npm run build
