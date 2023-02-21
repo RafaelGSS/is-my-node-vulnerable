@@ -62,15 +62,15 @@ const CORE_RAW_URL = 'https://raw.githubusercontent.com/nodejs/security-wg/main/
 
 let lastETagValue
 
-const coreLocalFile = path.join(__dirname, 'core.json')
-const ETagFile = path.join(__dirname, '.etag')
+const coreLocalFile = __nccwpck_require__.ab + "core.json"
+const ETagFile = __nccwpck_require__.ab + ".etag"
 
 async function readLocal (file) {
   return require(file)
 }
 
 function loadETag () {
-  if (fs.existsSync(ETagFile)) {
+  if (fs.existsSync(__nccwpck_require__.ab + ".etag")) {
     debug('Loading local ETag')
     lastETagValue = fs.readFileSync(ETagFile).toString()
   }
@@ -78,7 +78,7 @@ function loadETag () {
 
 function updateLastETag (etag) {
   lastETagValue = etag
-  fs.writeFileSync(ETagFile, lastETagValue)
+  fs.writeFileSync(__nccwpck_require__.ab + ".etag", lastETagValue)
 }
 
 async function fetchCoreIndex () {
@@ -89,20 +89,20 @@ async function fetchCoreIndex () {
       abortRequest.emit('abort')
       process.nextTick(() => { process.exit(1) })
     }
-    return fs.createWriteStream(coreLocalFile, { flags: 'w', autoClose: true })
+    return fs.createWriteStream(__nccwpck_require__.ab + "core.json", { flags: 'w', autoClose: true })
   })
-  return readLocal(coreLocalFile)
+  return readLocal(__nccwpck_require__.ab + "core.json")
 }
 
 async function getCoreIndex () {
   const { headers } = await request(CORE_RAW_URL, { method: 'HEAD' })
-  if (!lastETagValue || lastETagValue !== headers.etag || !fs.existsSync(coreLocalFile)) {
+  if (!lastETagValue || lastETagValue !== headers.etag || !fs.existsSync(__nccwpck_require__.ab + "core.json")) {
     updateLastETag(headers.etag)
     debug('Creating local core.json')
     return fetchCoreIndex()
   } else {
     debug(`No updates from upstream. Getting a cached version: ${coreLocalFile}`)
-    return readLocal(coreLocalFile)
+    return readLocal(__nccwpck_require__.ab + "core.json")
   }
 }
 
@@ -41513,20 +41513,23 @@ module.exports = require("zlib");
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-const core = __nccwpck_require__(2186);
+const core = __nccwpck_require__(2186)
 const { isNodeVulnerable } = __nccwpck_require__(2932)
 
 async function run () {
-
   // Inputs
   const nodeVersion = core.getInput('node-version', { required: true })
-  if(isNodeVulnerable(nodeVersion)){
-    core.setFailed(`Node.js version ${nodeVersion} is vulnerable`)
+  core.info(`Checking Node.js version ${nodeVersion}...`)
+  const isVulnerable = await isNodeVulnerable(nodeVersion)
+  if (isVulnerable) {
+    core.setFailed(`Node.js version ${nodeVersion} is vulnerable. Please upgrade!`)
+  } else {
+    core.info(`Node.js version ${nodeVersion} is OK!`)
   }
-
 }
 
 run()
+
 })();
 
 module.exports = __webpack_exports__;
