@@ -6,6 +6,12 @@ runs:
   using: 'node16'
   main: 'dist/index.js'
 
+inputs:
+  node-version:
+    description: 'Node.js version to check'
+    required: true
+    default: '16.13.0'
+
 # https://actions-cool.github.io/github-action-branding/
 branding:
   icon: 'flag'
