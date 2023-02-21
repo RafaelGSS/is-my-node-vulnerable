@@ -11,6 +11,7 @@
     "nodejs"
   ],
   "scripts": {
+    "build": "ncc build action.js -o dist",
     "test": "npm run lint && node test.js",
     "lint": "standard"
   },
@@ -21,6 +22,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@actions/core": "^1.10.0",
     "@pkgjs/nv": "^0.2.1",
     "cli-color": "^2.0.3",
     "debug": "^4.3.4",
@@ -28,6 +30,7 @@
     "undici": "^5.15.1"
   },
   "devDependencies": {
-    "standard": "^17.0.0"
+    "standard": "^17.0.0",
+    "@vercel/ncc": "^0.36.1"
   }
 }
