@@ -80,3 +80,25 @@ isNodeVulnerable('19.0.0') // true
 ```
 
 [Node.js Security Database]: https://github.com/nodejs/security-wg/tree/main/vuln
+
+
+## Github Action
+
+This package also provide a Github Action, just include the `node-version` in the yml as follows in order to check an specific version:
+
+```yml
+name: "Node.js Vulnerabilities"
+on: 
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  is-my-node-vulnerable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check Node.js
+        uses: RafaelGSS/is-my-node-vulnerable@v1.2.0
+        with:
+          node-version: "18.14.1"
+```
