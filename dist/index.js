@@ -51,6 +51,7 @@ const { request, stream, setGlobalDispatcher, Agent } = __nccwpck_require__(1773
 const EE = __nccwpck_require__(2361)
 const fs = __nccwpck_require__(7147)
 const path = __nccwpck_require__(1017)
+const os = __nccwpck_require__(2037)
 const debug = __nccwpck_require__(8237)('is-my-node-vulnerable')
 const satisfies = __nccwpck_require__(6055)
 const { danger, vulnerableWarning, bold, separator, allGood } = __nccwpck_require__(9139)
@@ -106,13 +107,18 @@ async function getCoreIndex () {
   }
 }
 
-function getVulnerabilityList (currentVersion, data) {
+function getVulnerabilityList (currentVersion, data, systemEnvironment) {
   const list = []
   for (const key in data) {
     const vuln = data[key]
     if (
-      satisfies(currentVersion, vuln.vulnerable) &&
-      !satisfies(currentVersion, vuln.patched)
+      (
+        satisfies(currentVersion, vuln.vulnerable) &&
+        !satisfies(currentVersion, vuln.patched)
+      ) && (
+        (!systemEnvironment || !Array.isArray(vuln.affectedEnvironments)) ||
+        vuln.affectedEnvironments.includes(systemEnvironment)
+      )
     ) {
       list.push(`${bold(vuln.cve)}: ${vuln.overview}\n${bold('Patched versions')}: ${vuln.patched}`)
     }
@@ -120,7 +126,19 @@ function getVulnerabilityList (currentVersion, data) {
   return list
 }
 
-async function main (currentVersion) {
+const getSystemEnvironment = (platform) => {
+  switch (platform) {
+    case 'darwin':
+      return 'osx'
+    case 'win32':
+      return 'win'
+    default:
+      return 'linux'
+  }
+}
+
+async function main (currentVersion, platform) {
+  const systemEnvironment = getSystemEnvironment(platform)
   const isEOL = await isNodeEOL(currentVersion)
   if (isEOL) {
     console.error(danger)
@@ -129,7 +147,7 @@ async function main (currentVersion) {
   }
 
   const coreIndex = await getCoreIndex()
-  const list = getVulnerabilityList(currentVersion, coreIndex)
+  const list = getVulnerabilityList(currentVersion, coreIndex, systemEnvironment)
   if (list.length) {
     console.error(danger)
     console.error(vulnerableWarning + '\n')
@@ -162,14 +180,14 @@ async function isNodeEOL (version) {
   return now > end
 }
 
-async function isNodeVulnerable (version) {
+async function isNodeVulnerable (version, systemEnvironment) {
   const isEOL = await isNodeEOL(version)
   if (isEOL) {
     return true
   }
 
   const coreIndex = await getCoreIndex()
-  const list = getVulnerabilityList(version, coreIndex)
+  const list = getVulnerabilityList(version, coreIndex, systemEnvironment)
   return list.length > 0
 }
 
@@ -41519,8 +41537,14 @@ const { isNodeVulnerable } = __nccwpck_require__(2932)
 async function run () {
   // Inputs
   const nodeVersion = core.getInput('node-version', { required: true })
-  core.info(`Checking Node.js version ${nodeVersion}...`)
-  const isVulnerable = await isNodeVulnerable(nodeVersion)
+  const platform = core.getInput('platform', { required: false })
+
+  if (platform && !['linux', 'win', 'osx'].includes(platform)) {
+    core.setFailed(`platform ${platform} is not valid. Please use linux, win or osx.`)
+  }
+
+  core.info(`Checking Node.js version ${nodeVersion} with platform ${platform}...`)
+  const isVulnerable = await isNodeVulnerable(nodeVersion, platform)
   if (isVulnerable) {
     core.setFailed(`Node.js version ${nodeVersion} is vulnerable. Please upgrade!`)
   } else {

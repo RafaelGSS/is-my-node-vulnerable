@@ -4,6 +4,7 @@ const { request, stream, setGlobalDispatcher, Agent } = require('undici')
 const EE = require('events')
 const fs = require('fs')
 const path = require('path')
+const os = require('os')
 const debug = require('debug')('is-my-node-vulnerable')
 const satisfies = require('semver/functions/satisfies')
 const { danger, vulnerableWarning, bold, separator, allGood } = require('./ascii')
@@ -59,13 +60,18 @@ async function getCoreIndex () {
   }
 }
 
-function getVulnerabilityList (currentVersion, data) {
+function getVulnerabilityList (currentVersion, data, systemEnvironment) {
   const list = []
   for (const key in data) {
     const vuln = data[key]
     if (
-      satisfies(currentVersion, vuln.vulnerable) &&
-      !satisfies(currentVersion, vuln.patched)
+      (
+        satisfies(currentVersion, vuln.vulnerable) &&
+        !satisfies(currentVersion, vuln.patched)
+      ) && (
+        (!systemEnvironment || !Array.isArray(vuln.affectedEnvironments)) ||
+        vuln.affectedEnvironments.includes(systemEnvironment)
+      )
     ) {
       list.push(`${bold(vuln.cve)}: ${vuln.overview}\n${bold('Patched versions')}: ${vuln.patched}`)
     }
@@ -73,7 +79,19 @@ function getVulnerabilityList (currentVersion, data) {
   return list
 }
 
-async function main (currentVersion) {
+const getSystemEnvironment = (platform) => {
+  switch (platform) {
+    case 'darwin':
+      return 'osx'
+    case 'win32':
+      return 'win'
+    default:
+      return 'linux'
+  }
+}
+
+async function main (currentVersion, platform) {
+  const systemEnvironment = getSystemEnvironment(platform)
   const isEOL = await isNodeEOL(currentVersion)
   if (isEOL) {
     console.error(danger)
@@ -82,7 +100,7 @@ async function main (currentVersion) {
   }
 
   const coreIndex = await getCoreIndex()
-  const list = getVulnerabilityList(currentVersion, coreIndex)
+  const list = getVulnerabilityList(currentVersion, coreIndex, systemEnvironment)
   if (list.length) {
     console.error(danger)
     console.error(vulnerableWarning + '\n')
@@ -115,14 +133,14 @@ async function isNodeEOL (version) {
   return now > end
 }
 
-async function isNodeVulnerable (version) {
+async function isNodeVulnerable (version, systemEnvironment) {
   const isEOL = await isNodeEOL(version)
   if (isEOL) {
     return true
   }
 
   const coreIndex = await getCoreIndex()
-  const list = getVulnerabilityList(version, coreIndex)
+  const list = getVulnerabilityList(version, coreIndex, systemEnvironment)
   return list.length > 0
 }
 
@@ -132,7 +150,7 @@ if (process.argv[2] !== '-r') {
 
 // CLI
 if (require.main === module) {
-  main(process.version)
+  main(process.version, os.platform())
 } else {
   module.exports = {
     isNodeVulnerable
