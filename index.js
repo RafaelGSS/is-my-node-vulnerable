@@ -70,7 +70,8 @@ function getVulnerabilityList (currentVersion, data, systemEnvironment) {
         !satisfies(currentVersion, vuln.patched)
       ) && (
         (!systemEnvironment || !Array.isArray(vuln.affectedEnvironments)) ||
-        vuln.affectedEnvironments.includes(systemEnvironment)
+        vuln.affectedEnvironments.includes(systemEnvironment) ||
+        vuln.affectedEnvironments.includes('all')
       )
     ) {
       list.push(`${bold(vuln.cve)}: ${vuln.overview}\n${bold('Patched versions')}: ${vuln.patched}`)
