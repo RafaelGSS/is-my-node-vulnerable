@@ -11,6 +11,9 @@ inputs:
     description: 'Node.js version to check'
     required: true
     default: '16.13.0'
+  platform:
+    description: 'Platform to check'
+    required: false
 
 # https://actions-cool.github.io/github-action-branding/
 branding:
