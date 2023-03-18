@@ -8,6 +8,7 @@ async function run () {
 
   if (platform && !['linux', 'win', 'osx'].includes(platform)) {
     core.setFailed(`platform ${platform} is not valid. Please use linux, win or osx.`)
+    return
   }
 
   core.info(`Checking Node.js version ${nodeVersion} with platform ${platform}...`)
