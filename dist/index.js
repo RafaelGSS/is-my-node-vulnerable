@@ -107,19 +107,35 @@ async function getCoreIndex () {
   }
 }
 
-function getVulnerabilityList (currentVersion, data, systemEnvironment) {
+const checkPlatform = platform => {
+  const availablePlatforms = ['aix', 'darwin', 'freebsd', 'linux', 'openbsd', 'sunos', 'win32', 'android']
+  if (platform && !availablePlatforms.includes(platform)) {
+    throw new Error(`platform ${platform} is not valid. Please use ${availablePlatforms.join(',')}.`)
+  }
+}
+const isSystemAffected = (platform, affectedEnvironments) => {
+  // No platform specified (legacy mode)
+  if (!platform || !Array.isArray(affectedEnvironments)) {
+    return true
+  }
+  // If the environment is matching or all the environments are affected
+  if (affectedEnvironments.includes(platform) || affectedEnvironments.includes('all')) {
+    return true
+  }
+  // Default to false
+  return false
+}
+
+function getVulnerabilityList (currentVersion, data, platform) {
   const list = []
   for (const key in data) {
     const vuln = data[key]
+
     if (
       (
         satisfies(currentVersion, vuln.vulnerable) &&
         !satisfies(currentVersion, vuln.patched)
-      ) && (
-        (!systemEnvironment || !Array.isArray(vuln.affectedEnvironments)) ||
-        vuln.affectedEnvironments.includes(systemEnvironment) ||
-        vuln.affectedEnvironments.includes('all')
-      )
+      ) && isSystemAffected(platform, vuln.affectedEnvironments)
     ) {
       list.push(`${bold(vuln.cve)}: ${vuln.overview}\n${bold('Patched versions')}: ${vuln.patched}`)
     }
@@ -127,19 +143,8 @@ function getVulnerabilityList (currentVersion, data, systemEnvironment) {
   return list
 }
 
-const getSystemEnvironment = (platform) => {
-  switch (platform) {
-    case 'darwin':
-      return 'osx'
-    case 'win32':
-      return 'win'
-    default:
-      return 'linux'
-  }
-}
-
 async function main (currentVersion, platform) {
-  const systemEnvironment = getSystemEnvironment(platform)
+  checkPlatform(platform)
   const isEOL = await isNodeEOL(currentVersion)
   if (isEOL) {
     console.error(danger)
@@ -148,7 +153,7 @@ async function main (currentVersion, platform) {
   }
 
   const coreIndex = await getCoreIndex()
-  const list = getVulnerabilityList(currentVersion, coreIndex, systemEnvironment)
+  const list = getVulnerabilityList(currentVersion, coreIndex, platform)
   if (list.length) {
     console.error(danger)
     console.error(vulnerableWarning + '\n')
@@ -181,14 +186,15 @@ async function isNodeEOL (version) {
   return now > end
 }
 
-async function isNodeVulnerable (version, systemEnvironment) {
+async function isNodeVulnerable (version, platform) {
+  checkPlatform(platform)
   const isEOL = await isNodeEOL(version)
   if (isEOL) {
     return true
   }
 
   const coreIndex = await getCoreIndex()
-  const list = getVulnerabilityList(version, coreIndex, systemEnvironment)
+  const list = getVulnerabilityList(version, coreIndex, platform)
   return list.length > 0
 }
 
@@ -41539,10 +41545,6 @@ async function run () {
   // Inputs
   const nodeVersion = core.getInput('node-version', { required: true })
   const platform = core.getInput('platform', { required: false })
-
-  if (platform && !['linux', 'win', 'osx'].includes(platform)) {
-    core.setFailed(`platform ${platform} is not valid. Please use linux, win or osx.`)
-  }
 
   core.info(`Checking Node.js version ${nodeVersion} with platform ${platform}...`)
   const isVulnerable = await isNodeVulnerable(nodeVersion, platform)

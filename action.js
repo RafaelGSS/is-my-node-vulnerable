@@ -5,12 +5,6 @@ async function run () {
   // Inputs
   const nodeVersion = core.getInput('node-version', { required: true })
   const platform = core.getInput('platform', { required: false })
-  const availablePlatforms = ["aix", "darwin", "freebsd", "linux", "openbsd", "sunos", "win32", "android"]
-
-  if (platform && !availablePlatforms.includes(platform)) {
-    core.setFailed(`platform ${platform} is not valid. Please use ${availablePlatforms.join(',')}.`)
-    return
-  }
 
   core.info(`Checking Node.js version ${nodeVersion} with platform ${platform}...`)
   const isVulnerable = await isNodeVulnerable(nodeVersion, platform)
