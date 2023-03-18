@@ -80,19 +80,7 @@ function getVulnerabilityList (currentVersion, data, systemEnvironment) {
   return list
 }
 
-const getSystemEnvironment = (platform) => {
-  switch (platform) {
-    case 'darwin':
-      return 'osx'
-    case 'win32':
-      return 'win'
-    default:
-      return 'linux'
-  }
-}
-
 async function main (currentVersion, platform) {
-  const systemEnvironment = getSystemEnvironment(platform)
   const isEOL = await isNodeEOL(currentVersion)
   if (isEOL) {
     console.error(danger)
@@ -101,7 +89,7 @@ async function main (currentVersion, platform) {
   }
 
   const coreIndex = await getCoreIndex()
-  const list = getVulnerabilityList(currentVersion, coreIndex, systemEnvironment)
+  const list = getVulnerabilityList(currentVersion, coreIndex, platform)
   if (list.length) {
     console.error(danger)
     console.error(vulnerableWarning + '\n')
