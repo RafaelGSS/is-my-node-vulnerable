@@ -79,6 +79,14 @@ const { isNodeVulnerable } = require('is-my-node-vulnerable')
 isNodeVulnerable('19.0.0') // true
 ```
 
+Optionally you can define the platform with the argument `platform` to limit the scope. The available platforms are [the same values](https://nodejs.org/api/os.html#osplatform) available in for `os.platform()`.
+
+```js
+const { isNodeVulnerable } = require('is-my-node-vulnerable')
+
+isNodeVulnerable('19.0.0', 'linux') // true
+```
+
 [Node.js Security Database]: https://github.com/nodejs/security-wg/tree/main/vuln
 
 
@@ -101,4 +109,15 @@ jobs:
         uses: RafaelGSS/is-my-node-vulnerable@v1.2.0
         with:
           node-version: "18.14.1"
+```
+
+Optionally you can define the platform with the argument `platform` to limit the scope. The available platforms are [the same values](https://nodejs.org/api/os.html#osplatform) available in for `os.platform()`.
+
+```yml
+      - uses: actions/checkout@v3
+      - name: Check Node.js
+        uses: RafaelGSS/is-my-node-vulnerable@v1.2.0
+        with:
+          node-version: "18.14.1"
+          platform: "linux"
 ```
