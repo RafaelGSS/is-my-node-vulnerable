@@ -5,9 +5,10 @@ async function run () {
   // Inputs
   const nodeVersion = core.getInput('node-version', { required: true })
   const platform = core.getInput('platform', { required: false })
+  const availablePlatforms = ['linux', 'win', 'osx', 'smartos', 'aix', 'freebsd']
 
-  if (platform && !['linux', 'win', 'osx'].includes(platform)) {
-    core.setFailed(`platform ${platform} is not valid. Please use linux, win or osx.`)
+  if (platform && !availablePlatforms.includes(platform)) {
+    core.setFailed(`platform ${platform} is not valid. Please use ${availablePlatforms.join(',')}.`)
     return
   }
 
