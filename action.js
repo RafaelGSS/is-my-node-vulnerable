@@ -5,7 +5,7 @@ async function run () {
   // Inputs
   const nodeVersion = core.getInput('node-version', { required: true })
   const platform = core.getInput('platform', { required: false })
-  const availablePlatforms = ['linux', 'win', 'osx', 'smartos', 'aix', 'freebsd']
+  const availablePlatforms = ["aix", "darwin", "freebsd", "linux", "openbsd", "sunos", "win32", "android"]
 
   if (platform && !availablePlatforms.includes(platform)) {
     core.setFailed(`platform ${platform} is not valid. Please use ${availablePlatforms.join(',')}.`)
