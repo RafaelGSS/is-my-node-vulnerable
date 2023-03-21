@@ -63,15 +63,15 @@ const CORE_RAW_URL = 'https://raw.githubusercontent.com/nodejs/security-wg/main/
 
 let lastETagValue
 
-const coreLocalFile = __nccwpck_require__.ab + "core.json"
-const ETagFile = __nccwpck_require__.ab + ".etag"
+const coreLocalFile = path.join(__dirname, 'core.json')
+const ETagFile = path.join(__dirname, '.etag')
 
 async function readLocal (file) {
   return require(file)
 }
 
 function loadETag () {
-  if (fs.existsSync(__nccwpck_require__.ab + ".etag")) {
+  if (fs.existsSync(ETagFile)) {
     debug('Loading local ETag')
     lastETagValue = fs.readFileSync(ETagFile).toString()
   }
@@ -79,7 +79,7 @@ function loadETag () {
 
 function updateLastETag (etag) {
   lastETagValue = etag
-  fs.writeFileSync(__nccwpck_require__.ab + ".etag", lastETagValue)
+  fs.writeFileSync(ETagFile, lastETagValue)
 }
 
 async function fetchCoreIndex () {
@@ -90,20 +90,20 @@ async function fetchCoreIndex () {
       abortRequest.emit('abort')
       process.nextTick(() => { process.exit(1) })
     }
-    return fs.createWriteStream(__nccwpck_require__.ab + "core.json", { flags: 'w', autoClose: true })
+    return fs.createWriteStream(coreLocalFile, { flags: 'w', autoClose: true })
   })
-  return readLocal(__nccwpck_require__.ab + "core.json")
+  return readLocal(coreLocalFile)
 }
 
 async function getCoreIndex () {
   const { headers } = await request(CORE_RAW_URL, { method: 'HEAD' })
-  if (!lastETagValue || lastETagValue !== headers.etag || !fs.existsSync(__nccwpck_require__.ab + "core.json")) {
+  if (!lastETagValue || lastETagValue !== headers.etag || !fs.existsSync(coreLocalFile)) {
     updateLastETag(headers.etag)
     debug('Creating local core.json')
     return fetchCoreIndex()
   } else {
     debug(`No updates from upstream. Getting a cached version: ${coreLocalFile}`)
-    return readLocal(__nccwpck_require__.ab + "core.json")
+    return readLocal(coreLocalFile)
   }
 }
 
