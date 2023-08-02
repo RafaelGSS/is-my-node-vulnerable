@@ -17,7 +17,7 @@ It's strongly recommended to include this as a step in the app CI.
 
 ```console
 $ node -v
-v19.0.0
+v20.3.0
 $ npx is-my-node-vulnerable
 
 
@@ -28,11 +28,11 @@ $ npx is-my-node-vulnerable
 ██████  ██   ██ ██   ████  ██████  ███████ ██   ██
 
 
-The current Node.js version (v19.0.0) is vulnerable to the following CVEs:
+The current Node.js version (v20.3.0) is vulnerable to the following CVEs:
 
-CVE-2022-43548: The Node.js rebinding protector for --inspect still allows invalid IP address, specifically, the octal format.
-Patched versions: ^14.21.1 || ^16.18.1 || ^18.12.1 || ^19.0.1
-=============================================================================================================================================
+CVE-2023-30581: The use of proto in process.mainModule.proto.require() can bypass the policy mechanism and require modules outside of the policy.json definition
+Patched versions: ^16.20.1 || ^18.16.1 || ^20.3.1
+==================================================================================================================================================================================
 ```
 
 ### Output - When non-vulnerable
