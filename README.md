@@ -39,7 +39,7 @@ Patched versions: ^16.20.1 || ^18.16.1 || ^20.3.1
 
 ```console
 $ node -v
-v20.5.0
+v20.5.1
 $ npx is-my-node-vulnerable
 
 
