@@ -12,6 +12,7 @@ async function t () {
   assert.ok(await isNodeVulnerable('19.6.0'))
   assert.ok(await isNodeVulnerable('18.14.0'))
   assert.ok(await isNodeVulnerable('16.19.0'))
+  assert.ok(await isNodeVulnerable('20.8.0'))
 
   assert.rejects(() => isNodeVulnerable('lts'), /not get exactly one version/)
   assert.rejects(() => isNodeVulnerable('999'), /not get exactly one version/)
@@ -19,6 +20,9 @@ async function t () {
   assert.rejects(() => isNodeVulnerable('21.0.0'), /not get exactly one version/)
 
   // EOL
+  // EOL
+  assert.ok(await isNodeVulnerable('19.0.0'))
+  assert.ok(await isNodeVulnerable('16.0.0'))
   assert.ok(await isNodeVulnerable('17.0.0'))
   assert.ok(await isNodeVulnerable('15.0.0'))
   assert.ok(await isNodeVulnerable('13.0.0'))
