@@ -14,7 +14,11 @@ async function t () {
   assert.ok(await isNodeVulnerable('18.14.0'))
   assert.ok(await isNodeVulnerable('16.19.0'))
   assert.ok(await isNodeVulnerable('20.8.0'))
+  assert.ok(await isNodeVulnerable('20.11.0'))
 
+  const [active, _] = await nv('active')
+  assert.ok(!await isNodeVulnerable(active))
+  
   const ltsVersions = await nv(['lts'])
   if (ltsVersions.length > 1) {
     assert.rejects(() => isNodeVulnerable('lts'), /not get exactly one version/)
