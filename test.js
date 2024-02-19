@@ -14,6 +14,12 @@ async function t () {
   assert.ok(await isNodeVulnerable('18.14.0'))
   assert.ok(await isNodeVulnerable('16.19.0'))
   assert.ok(await isNodeVulnerable('20.8.0'))
+  assert.ok(await isNodeVulnerable('20.11.0'))
+
+  const activeVersions = await nv('active')
+  for (const active of activeVersions) {
+    assert.ok(!await isNodeVulnerable(active.version))
+  }
 
   const ltsVersions = await nv(['lts'])
   if (ltsVersions.length > 1) {
