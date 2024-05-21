@@ -27,7 +27,7 @@ async function t () {
   }
   assert.rejects(() => isNodeVulnerable('999'), /not get exactly one version/)
   assert.rejects(() => isNodeVulnerable('Unobtanium'), /not get exactly one version/) // i.e. not found
-  assert.rejects(() => isNodeVulnerable('22.0.0'), /not get exactly one version/)
+  assert.rejects(() => isNodeVulnerable('24.0.0'), /not get exactly one version/)
 
   // EOL
   assert.ok(await isNodeVulnerable('19.0.0'))
