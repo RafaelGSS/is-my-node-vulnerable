@@ -1,6 +1,6 @@
 {
   "name": "is-my-node-vulnerable",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "package that checks if your Node.js installation is vulnerable to known security vulnerabilities",
   "main": "index.js",
   "bin": {
