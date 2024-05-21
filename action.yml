@@ -10,7 +10,7 @@ inputs:
   node-version:
     description: 'Node.js version to check'
     required: true
-    default: '16.13.0'
+    default: 'v20.x'
   platform:
     description: 'Platform to check'
     required: false
