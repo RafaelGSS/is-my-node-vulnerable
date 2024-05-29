@@ -92,7 +92,7 @@ isNodeVulnerable('19.0.0', 'linux') // true
 
 ## Github Action
 
-This package also provide a Github Action, just include the `node-version` in the yml as follows in order to check an specific version:
+This package also provides a GitHub Action, just include the `node-version` in the yml as follows in order to check a specific version:
 
 ```yml
 name: "Node.js Vulnerabilities"
@@ -106,7 +106,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Check Node.js
-        uses: RafaelGSS/is-my-node-vulnerable@v1.2.0
+        uses: RafaelGSS/is-my-node-vulnerable@v1
         with:
           node-version: "18.14.1"
 ```
@@ -116,7 +116,7 @@ Optionally you can define the platform with the argument `platform` to limit the
 ```yml
       - uses: actions/checkout@v3
       - name: Check Node.js
-        uses: RafaelGSS/is-my-node-vulnerable@v1.2.0
+        uses: RafaelGSS/is-my-node-vulnerable@v1
         with:
           node-version: "18.14.1"
           platform: "linux"
