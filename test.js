@@ -39,6 +39,7 @@ async function t () {
   assert.ok(await isNodeVulnerable('v0.12.18'))
 
   // Platform specific
+  assert.ok(await isNodeVulnerable('22.4.0', 'win32'))
   assert.ok(await isNodeVulnerable('19.0.0', 'linux'))
   assert.ok(await isNodeVulnerable('18.0.0', 'win32'))
   assert.ok(await isNodeVulnerable('14.0.0', 'android'))
