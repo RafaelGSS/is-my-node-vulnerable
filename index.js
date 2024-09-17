@@ -90,7 +90,7 @@ function getVulnerabilityList (currentVersion, data, platform) {
         !satisfies(currentVersion, vuln.patched)
       ) && isSystemAffected(platform, vuln.affectedEnvironments)
     ) {
-      list.push(`${bold(vuln.cve)}: ${vuln.overview}\n${bold('Patched versions')}: ${vuln.patched}`)
+      list.push(`${bold(vuln.cve)}(${vuln.severity}): ${vuln.overview}\n${bold('Patched versions')}: ${vuln.patched}`)
     }
   }
   return list
