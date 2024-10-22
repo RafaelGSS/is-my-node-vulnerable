@@ -1,4 +1,4 @@
-const clc = require('cli-color')
+var util = require('util')
 
 const danger = '\n' +
 '\n' +
@@ -18,12 +18,23 @@ const allGood = '\n' +
 '██   ██ ███████ ███████      ██████   ██████   ██████  ██████         ██\n' +
 '\n'
 
-const bold = clc.bold
+function escapeStyleCode (code) {
+  return '\u001b[' + code + 'm'
+}
+
+function bold (text) {
+  var left = ''
+  var right = ''
+  const formatCodes = util.inspect.colors.bold
+  left += escapeStyleCode(formatCodes[0])
+  right = escapeStyleCode(formatCodes[1]) + right
+  return left + text + right
+}
 
 const vulnerableWarning = bold('The current Node.js version (' + process.version + ') is vulnerable to the following CVEs:')
 
-let separator = '='
-for (let i = 0; i < process.stdout.columns; ++i) {
+var separator = '='
+for (var i = 0; i < process.stdout.columns; ++i) {
   separator = separator + '='
 }
 

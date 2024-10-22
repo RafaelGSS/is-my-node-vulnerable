@@ -47,10 +47,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install
+      - name: Run test
         run: |
-          npm install
-
-      - name: Run validator
-        run: |
-          npm run test
+          node setup-test.js
