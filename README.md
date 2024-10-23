@@ -12,6 +12,12 @@ npx is-my-node-vulnerable
 
 It's strongly recommended to include this as a step in the app CI.
 
+> [!NOTE]
+> For retro-compatibility enthusiasts: This module supports Node.js versions >= v0.12.
+> However, npx does not work with those older versions, so you'll need to install the
+> package and run index.js manually. If you encounter errors when using npx, it's
+> likely because you're using a vulnerable version of Node.js. Please consider upgrading.
+
 ### Output - When vulnerable
 
 
@@ -72,6 +78,9 @@ End-of-Life versions don't keep track of recent security releases, therefore, it
 ## API
 
 This package also exports a function `isNodeVulnerable` to perform the check in runtime
+
+> [!NOTE]
+> The API is only supported on active Node.js versions (v18.x, v20.x, v22.x, v23.x)
 
 ```js
 const { isNodeVulnerable } = require('is-my-node-vulnerable')
