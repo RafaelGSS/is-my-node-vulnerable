@@ -12,7 +12,7 @@ if (isOldEnough(process.version)) {
   console.log(msg)
   process.exit(1)
 } else {
-  // // CLI
+  // CLI
   if (require.main === module) {
     require('./is-vulnerable').cli(process.version, require('os').platform())
   } else {
