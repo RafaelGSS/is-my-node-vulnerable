@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.separator = exports.vulnerableWarning = exports.bold = exports.allGood = exports.danger = void 0;
+const cli_color_1 = require("cli-color");
+Object.defineProperty(exports, "bold", { enumerable: true, get: function () { return cli_color_1.bold; } });
+const danger = (0, cli_color_1.red)("Danger");
+exports.danger = danger;
+const allGood = `All good ${(0, cli_color_1.green)(":)")}`;
+exports.allGood = allGood;
+const vulnerableWarning = (0, cli_color_1.bold)(`The current Node.js version (${process.version}) is vulnerable to the following CVEs:`);
+exports.vulnerableWarning = vulnerableWarning;
+const separator = "=".repeat(process.stdout.columns);
+exports.separator = separator;

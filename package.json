@@ -1,41 +1,40 @@
 {
-  "name": "is-my-node-vulnerable",
-  "version": "1.5.0",
-  "description": "package that checks if your Node.js installation is vulnerable to known security vulnerabilities",
-  "main": "index.js",
-  "bin": {
-    "is-my-node-vulnerable": "./index.js"
-  },
-  "keywords": [
-    "security",
-    "nodejs"
-  ],
-  "scripts": {
-    "build": "ncc build action.js -o dist",
-    "test": "npm run lint && node test.js",
-    "lint": "standard"
-  },
-  "author": "RafaelGSS <rafael.nunu@hotmail.com>",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/RafaelGSS/is-my-node-vulnerable"
-  },
-  "standard": {
-    "ignore": [
-      "dist/**"
-    ]
-  },
-  "license": "MIT",
-  "dependencies": {
-    "@actions/core": "^1.10.0",
-    "@pkgjs/nv": "^0.2.1",
-    "cli-color": "^2.0.3",
-    "debug": "^4.3.4",
-    "semver": "^7.3.8",
-    "undici": "^5.15.1"
-  },
-  "devDependencies": {
-    "standard": "^17.0.0",
-    "@vercel/ncc": "^0.36.1"
-  }
+	"name": "is-my-node-vulnerable",
+	"version": "1.5.0",
+	"description": "package that checks if your Node.js installation is vulnerable to known security vulnerabilities",
+	"main": "./dist/index.js",
+	"bin": {
+		"is-my-node-vulnerable": "./dist/cli.js"
+	},
+	"keywords": ["security", "nodejs"],
+	"scripts": {
+		"build": "npm run lint && tsc && npm run ncc",
+		"test": "node ./dist/test.js",
+		"ncc": "ncc build ./dist/cli -o ./bin",
+		"lint": "biome format --write ./src"
+	},
+	"author": "RafaelGSS <rafael.nunu@hotmail.com>",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/RafaelGSS/is-my-node-vulnerable"
+	},
+	"license": "MIT",
+	"dependencies": {
+		"@actions/core": "^1.11.1",
+		"@pkgjs/nv": "^0.2.2",
+		"cli-color": "^2.0.4",
+		"debug": "^4.3.7",
+		"semver": "^7.6.3",
+		"undici": "^6.20.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@types/cli-color": "^2.0.6",
+		"@types/debug": "^4.1.12",
+		"@types/node": "^22.8.0",
+		"@types/semver": "^7.5.8",
+		"@vercel/ncc": "^0.38.2",
+		"typescript": "^5.6.3"
+	},
+	"types": "./dist/types/index.d.ts"
 }
