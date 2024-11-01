@@ -3,7 +3,6 @@ const { request, stream, setGlobalDispatcher, Agent } = require('undici')
 const EE = require('events')
 const fs = require('fs')
 const path = require('path')
-const debug = require('debug')('is-my-node-vulnerable')
 const satisfies = require('semver/functions/satisfies')
 const nv = require('@pkgjs/nv')
 
@@ -18,6 +17,12 @@ const ETagFile = path.join(__dirname, '.etag')
 
 async function readLocal (file) {
   return require(file)
+}
+
+function debug (msg) {
+  if (process.env.DEBUG) {
+    console.debug(msg)
+  }
 }
 
 function loadETag () {
