@@ -1,6 +1,5 @@
 const { danger, allGood, bold, vulnerableWarning, separator } = require('./ascii')
 const { request } = require('https')
-const { pipeline } = require('stream')
 const fs = require('fs')
 const path = require('path')
 const satisfies = require('semver/functions/satisfies')
@@ -43,14 +42,17 @@ async function fetchCoreIndex () {
         process.nextTick(() => { process.exit(1) })
       }
 
-      const file = fs.createWriteStream(coreLocalFile)
-      pipeline(res, file, (err) => {
-        if (err) {
-          console.error(`Problem with request: ${err.message}`)
-          process.nextTick(() => { process.exit(1) })
-        } else {
-          resolve()
-        }
+      const fileStream = fs.createWriteStream(coreLocalFile)
+      res.pipe(fileStream)
+
+      fileStream.on('finish', () => {
+        fileStream.close()
+        resolve()
+      })
+
+      fileStream.on('error', (err) => {
+        console.error(`Error while writing to file '${coreLocalFile}'`, err.message)
+        process.nextTick(() => { process.exit(1) })
       })
     })
   })
