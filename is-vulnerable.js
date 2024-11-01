@@ -38,7 +38,7 @@ async function fetchCoreIndex () {
   await new Promise((resolve) => {
     request(CORE_RAW_URL, (res) => {
       if (res.statusCode !== 200) {
-        console.error('Request to Github failed. Aborting...')
+        console.error(`Request to Github returned http status ${res.statusCode}. Aborting...`)
         process.nextTick(() => { process.exit(1) })
       }
 
@@ -51,10 +51,13 @@ async function fetchCoreIndex () {
       })
 
       fileStream.on('error', (err) => {
-        console.error(`Error while writing to file '${coreLocalFile}'`, err.message)
+        console.error(`Error ${err.message} while writing to '${coreLocalFile}'. Aborting...`)
         process.nextTick(() => { process.exit(1) })
       })
-    })
+    }).on('error', (err) => {
+      console.error(`Request to Github returned error ${err.message}. Aborting...`)
+      process.nextTick(() => { process.exit(1) })
+    }).end()
   })
   return readLocal(coreLocalFile)
 }
@@ -63,7 +66,7 @@ async function getCoreIndex () {
   return new Promise((resolve) => {
     const req = request(CORE_RAW_URL, { method: 'HEAD' }, (res) => {
       if (res.statusCode !== 200) {
-        console.error('Request to Github failed. Aborting...')
+        console.error(`Request to Github returned http status ${res.statusCode}. Aborting...`)
         process.nextTick(() => { process.exit(1) })
       }
 
@@ -80,8 +83,8 @@ async function getCoreIndex () {
       }
     })
 
-    req.on('error', (e) => {
-      console.error(`Problem with request: ${e.message}`)
+    req.on('error', (err) => {
+      console.error(`Request to Github returned error ${err.message}. Aborting...`)
       process.nextTick(() => { process.exit(1) })
     })
 
