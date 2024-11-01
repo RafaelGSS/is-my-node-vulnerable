@@ -1,12 +1,10 @@
 const { danger, allGood, bold, vulnerableWarning, separator } = require('./ascii')
-const { request, stream, setGlobalDispatcher, Agent } = require('undici')
-const EE = require('events')
+const { request } = require('https')
+const { pipeline } = require('stream')
 const fs = require('fs')
 const path = require('path')
 const satisfies = require('semver/functions/satisfies')
 const nv = require('@pkgjs/nv')
-
-setGlobalDispatcher(new Agent({ connections: 20 }))
 
 const CORE_RAW_URL = 'https://raw.githubusercontent.com/nodejs/security-wg/main/vuln/core/index.json'
 
@@ -38,28 +36,55 @@ function updateLastETag (etag) {
 }
 
 async function fetchCoreIndex () {
-  const abortRequest = new EE()
-  await stream(CORE_RAW_URL, { signal: abortRequest }, ({ statusCode }) => {
-    if (statusCode !== 200) {
-      console.error('Request to Github failed. Aborting...')
-      abortRequest.emit('abort')
-      process.nextTick(() => { process.exit(1) })
-    }
-    return fs.createWriteStream(coreLocalFile, { flags: 'w', autoClose: true })
+  await new Promise((resolve) => {
+    request(CORE_RAW_URL, (res) => {
+      if (res.statusCode !== 200) {
+        console.error('Request to Github failed. Aborting...')
+        process.nextTick(() => { process.exit(1) })
+      }
+
+      const file = fs.createWriteStream(coreLocalFile)
+      pipeline(res, file, (err) => {
+        if (err) {
+          console.error(`Problem with request: ${err.message}`)
+          process.nextTick(() => { process.exit(1) })
+        } else {
+          resolve()
+        }
+      })
+    })
   })
   return readLocal(coreLocalFile)
 }
 
 async function getCoreIndex () {
-  const { headers } = await request(CORE_RAW_URL, { method: 'HEAD' })
-  if (!lastETagValue || lastETagValue !== headers.etag || !fs.existsSync(coreLocalFile)) {
-    updateLastETag(headers.etag)
-    debug('Creating local core.json')
-    return fetchCoreIndex()
-  } else {
-    debug(`No updates from upstream. Getting a cached version: ${coreLocalFile}`)
-    return readLocal(coreLocalFile)
-  }
+  return new Promise((resolve) => {
+    const req = request(CORE_RAW_URL, { method: 'HEAD' }, (res) => {
+      if (res.statusCode !== 200) {
+        console.error('Request to Github failed. Aborting...')
+        process.nextTick(() => { process.exit(1) })
+      }
+
+      res.on('data', () => {})
+
+      const { etag } = res.headers
+      if (!lastETagValue || lastETagValue !== etag || !fs.existsSync(coreLocalFile)) {
+        updateLastETag(etag)
+        debug('Creating local core.json')
+        resolve(fetchCoreIndex())
+      } else {
+        debug(`No updates from upstream. Getting a cached version: ${coreLocalFile}`)
+        resolve(readLocal(coreLocalFile))
+      }
+    })
+
+    req.on('error', (e) => {
+      console.error(`Problem with request: ${e.message}`)
+      process.nextTick(() => { process.exit(1) })
+    })
+
+    req.end()
+  })
 }
 
 const checkPlatform = platform => {
