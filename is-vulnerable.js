@@ -64,7 +64,7 @@ async function fetchCoreIndex () {
 
 async function getCoreIndex () {
   return new Promise((resolve) => {
-    const req = request(CORE_RAW_URL, { method: 'HEAD' }, (res) => {
+    request(CORE_RAW_URL, { method: 'HEAD' }, (res) => {
       if (res.statusCode !== 200) {
         console.error(`Request to Github returned http status ${res.statusCode}. Aborting...`)
         process.nextTick(() => { process.exit(1) })
@@ -81,14 +81,10 @@ async function getCoreIndex () {
         debug(`No updates from upstream. Getting a cached version: ${coreLocalFile}`)
         resolve(readLocal(coreLocalFile))
       }
-    })
-
-    req.on('error', (err) => {
+    }).on('error', (err) => {
       console.error(`Request to Github returned error ${err.message}. Aborting...`)
       process.nextTick(() => { process.exit(1) })
-    })
-
-    req.end()
+    }).end()
   })
 }
 
