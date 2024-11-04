@@ -123,5 +123,7 @@ out
 tags
 tags.*
 
-.etag
-core.json
+schedule.etag
+schedule.json
+security.etag
+security.json

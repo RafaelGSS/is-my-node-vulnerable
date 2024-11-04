@@ -3,14 +3,21 @@ const { request } = require('https')
 const fs = require('fs')
 const path = require('path')
 const satisfies = require('semver/functions/satisfies')
-const nv = require('@pkgjs/nv')
 
-const CORE_RAW_URL = 'https://raw.githubusercontent.com/nodejs/security-wg/main/vuln/core/index.json'
-
-let lastETagValue
-
-const coreLocalFile = path.join(__dirname, 'core.json')
-const ETagFile = path.join(__dirname, '.etag')
+const STORE = {
+  security: {
+    url: 'https://raw.githubusercontent.com/nodejs/security-wg/main/vuln/core/index.json',
+    jsonFile: path.join(__dirname, 'security.json'),
+    etagFile: path.join(__dirname, 'security.etag'),
+    etagValue: ''
+  },
+  schedule: {
+    url: 'https://raw.githubusercontent.com/nodejs/Release/main/schedule.json',
+    jsonFile: path.join(__dirname, 'schedule.json'),
+    etagFile: path.join(__dirname, 'schedule.etag'),
+    etagValue: ''
+  }
+}
 
 async function readLocal (file) {
   return require(file)
@@ -23,26 +30,23 @@ function debug (msg) {
 }
 
 function loadETag () {
-  if (fs.existsSync(ETagFile)) {
-    debug('Loading local ETag')
-    lastETagValue = fs.readFileSync(ETagFile).toString()
+  for (const [key, obj] of Object.entries(STORE)) {
+    if (fs.existsSync(obj.etagFile)) {
+      debug(`Loading local ETag for '${key}'`)
+      obj.etagValue = fs.readFileSync(obj.etagFile).toString()
+    }
   }
 }
 
-function updateLastETag (etag) {
-  lastETagValue = etag
-  fs.writeFileSync(ETagFile, lastETagValue)
-}
-
-async function fetchCoreIndex () {
+async function fetchJson (obj) {
   await new Promise((resolve) => {
-    request(CORE_RAW_URL, (res) => {
+    request(obj.url, (res) => {
       if (res.statusCode !== 200) {
         console.error(`Request to Github returned http status ${res.statusCode}. Aborting...`)
         process.nextTick(() => { process.exit(1) })
       }
 
-      const fileStream = fs.createWriteStream(coreLocalFile)
+      const fileStream = fs.createWriteStream(obj.jsonFile)
       res.pipe(fileStream)
 
       fileStream.on('finish', () => {
@@ -51,7 +55,7 @@ async function fetchCoreIndex () {
       })
 
       fileStream.on('error', (err) => {
-        console.error(`Error ${err.message} while writing to '${coreLocalFile}'. Aborting...`)
+        console.error(`Error ${err.message} while writing to '${obj.jsonFile}'. Aborting...`)
         process.nextTick(() => { process.exit(1) })
       })
     }).on('error', (err) => {
@@ -59,12 +63,12 @@ async function fetchCoreIndex () {
       process.nextTick(() => { process.exit(1) })
     }).end()
   })
-  return readLocal(coreLocalFile)
+  return readLocal(obj.jsonFile)
 }
 
-async function getCoreIndex () {
+async function getJson (obj) {
   return new Promise((resolve) => {
-    request(CORE_RAW_URL, { method: 'HEAD' }, (res) => {
+    request(obj.url, { method: 'HEAD' }, (res) => {
       if (res.statusCode !== 200) {
         console.error(`Request to Github returned http status ${res.statusCode}. Aborting...`)
         process.nextTick(() => { process.exit(1) })
@@ -73,13 +77,14 @@ async function getCoreIndex () {
       res.on('data', () => {})
 
       const { etag } = res.headers
-      if (!lastETagValue || lastETagValue !== etag || !fs.existsSync(coreLocalFile)) {
-        updateLastETag(etag)
+      if (!obj.etagValue || obj.eTagValue !== etag || !fs.existsSync(obj.jsonFile)) {
+        obj.etagValue = etag
+        fs.writeFileSync(obj.etagFile, etag)
         debug('Creating local core.json')
-        resolve(fetchCoreIndex())
+        resolve(fetchJson(obj))
       } else {
-        debug(`No updates from upstream. Getting a cached version: ${coreLocalFile}`)
-        resolve(readLocal(coreLocalFile))
+        debug(`No updates from upstream. Getting a cached version: ${obj.jsonFile}`)
+        resolve(readLocal(obj.jsonFile))
       }
     }).on('error', (err) => {
       console.error(`Request to Github returned error ${err.message}. Aborting...`)
@@ -94,6 +99,7 @@ const checkPlatform = platform => {
     throw new Error(`platform ${platform} is not valid. Please use ${availablePlatforms.join(',')}.`)
   }
 }
+
 const isSystemAffected = (platform, affectedEnvironments) => {
   // No platform specified (legacy mode)
   if (!platform || !Array.isArray(affectedEnvironments)) {
@@ -127,6 +133,7 @@ function getVulnerabilityList (currentVersion, data, platform) {
 
 async function cli (currentVersion, platform) {
   checkPlatform(platform)
+
   const isEOL = await isNodeEOL(currentVersion)
   if (isEOL) {
     console.error(danger)
@@ -134,8 +141,9 @@ async function cli (currentVersion, platform) {
     process.exit(1)
   }
 
-  const coreIndex = await getCoreIndex()
-  const list = getVulnerabilityList(currentVersion, coreIndex, platform)
+  const securityJson = await getJson(STORE.security)
+  const list = getVulnerabilityList(currentVersion, securityJson, platform)
+
   if (list.length) {
     console.error(danger)
     console.error(vulnerableWarning + '\n')
@@ -146,25 +154,40 @@ async function cli (currentVersion, platform) {
   }
 }
 
+async function getVersionInfo (version) {
+  const scheduleJson = await getJson(STORE.schedule)
+
+  if (scheduleJson[version.toLowerCase()]) {
+    return scheduleJson[version.toLowerCase()]
+  }
+
+  for (const [key, value] of Object.entries(scheduleJson)) {
+    if (satisfies(version, key)) {
+      return value
+    }
+  }
+
+  return null
+}
+
 /**
  * @param {string} version
  * @returns {Promise<boolean>} true if the version is end-of-life
  */
 async function isNodeEOL (version) {
-  const myVersionInfo = await nv(version)
+  const myVersionInfo = await getVersionInfo(version)
+
   if (!myVersionInfo) {
-    // i.e. isNodeEOL('abcd')
+    // i.e. isNodeEOL('abcd') or isNodeEOL('lts') or isNodeEOL('99')
     throw Error(`Could not fetch version information for ${version}`)
-  } else if (myVersionInfo.length !== 1) {
-    // i.e. isNodeEOL('lts') or isNodeEOL('99')
-    throw Error(`Did not get exactly one version record for ${version}`)
-  } else if (!myVersionInfo[0].end) {
+  } else if (!myVersionInfo.end) {
     // We got a record, but..
     // v0.12.18 etc does not have an EOL date, which probably means too old.
     return true
   }
+
   const now = new Date()
-  const end = new Date(myVersionInfo[0].end)
+  const end = new Date(myVersionInfo.end)
   return now > end
 }
 
@@ -175,7 +198,7 @@ async function isNodeVulnerable (version, platform) {
     return true
   }
 
-  const coreIndex = await getCoreIndex()
+  const coreIndex = await getJson(STORE.security)
   const list = getVulnerabilityList(version, coreIndex, platform)
   return list.length > 0
 }

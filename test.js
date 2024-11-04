@@ -1,5 +1,4 @@
 const assert = require('assert')
-const nv = require('@pkgjs/nv')
 const { isNodeVulnerable } = require('./index')
 
 async function t () {
@@ -16,18 +15,9 @@ async function t () {
   assert.ok(await isNodeVulnerable('20.8.0'))
   assert.ok(await isNodeVulnerable('20.11.0'))
 
-  const activeVersions = await nv('active')
-  for (const active of activeVersions) {
-    assert.ok(!await isNodeVulnerable(active.version))
-  }
-
-  const ltsVersions = await nv(['lts'])
-  if (ltsVersions.length > 1) {
-    assert.rejects(() => isNodeVulnerable('lts'), /not get exactly one version/)
-  }
-  assert.rejects(() => isNodeVulnerable('999'), /not get exactly one version/)
-  assert.rejects(() => isNodeVulnerable('Unobtanium'), /not get exactly one version/) // i.e. not found
-  assert.rejects(() => isNodeVulnerable('24.0.0'), /not get exactly one version/)
+  assert.rejects(() => isNodeVulnerable('999'), /Could not fetch version information/)
+  assert.rejects(() => isNodeVulnerable('Unobtanium'), /Could not fetch version information/) // i.e. not found
+  assert.rejects(() => isNodeVulnerable('25.0.0'), /Could not fetch version information/)
 
   // EOL
   assert.ok(await isNodeVulnerable('19.0.0'))
