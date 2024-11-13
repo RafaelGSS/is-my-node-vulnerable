@@ -1,23 +1,9 @@
 const { danger, allGood, bold, vulnerableWarning, separator } = require('./ascii')
 const { request } = require('https')
 const fs = require('fs')
-const path = require('path')
 const satisfies = require('semver/functions/satisfies')
-
-const STORE = {
-  security: {
-    url: 'https://raw.githubusercontent.com/nodejs/security-wg/main/vuln/core/index.json',
-    jsonFile: path.join(__dirname, 'security.json'),
-    etagFile: path.join(__dirname, 'security.etag'),
-    etagValue: ''
-  },
-  schedule: {
-    url: 'https://raw.githubusercontent.com/nodejs/Release/main/schedule.json',
-    jsonFile: path.join(__dirname, 'schedule.json'),
-    etagFile: path.join(__dirname, 'schedule.etag'),
-    etagValue: ''
-  }
-}
+const isNodeEOL = require('./is-node-eol')
+const STORE = require('./store')
 
 async function readLocal (file) {
   return require(file)
@@ -134,7 +120,9 @@ function getVulnerabilityList (currentVersion, data, platform) {
 async function cli (currentVersion, platform) {
   checkPlatform(platform)
 
-  const isEOL = await isNodeEOL(currentVersion)
+  const scheduleJson = await getJson(STORE.schedule)
+  const isEOL = isNodeEOL(currentVersion, scheduleJson)
+
   if (isEOL) {
     console.error(danger)
     console.error(`${currentVersion} is end-of-life. There are high chances of being vulnerable. Please upgrade it.`)
@@ -154,52 +142,19 @@ async function cli (currentVersion, platform) {
   }
 }
 
-async function getVersionInfo (version) {
-  const scheduleJson = await getJson(STORE.schedule)
-
-  if (scheduleJson[version.toLowerCase()]) {
-    return scheduleJson[version.toLowerCase()]
-  }
-
-  for (const [key, value] of Object.entries(scheduleJson)) {
-    if (satisfies(version, key)) {
-      return value
-    }
-  }
-
-  return null
-}
-
-/**
- * @param {string} version
- * @returns {Promise<boolean>} true if the version is end-of-life
- */
-async function isNodeEOL (version) {
-  const myVersionInfo = await getVersionInfo(version)
-
-  if (!myVersionInfo) {
-    // i.e. isNodeEOL('abcd') or isNodeEOL('lts') or isNodeEOL('99')
-    throw Error(`Could not fetch version information for ${version}`)
-  } else if (!myVersionInfo.end) {
-    // We got a record, but..
-    // v0.12.18 etc does not have an EOL date, which probably means too old.
-    return true
-  }
-
-  const now = new Date()
-  const end = new Date(myVersionInfo.end)
-  return now > end
-}
-
 async function isNodeVulnerable (version, platform) {
   checkPlatform(platform)
-  const isEOL = await isNodeEOL(version)
+
+  const scheduleJson = await getJson(STORE.schedule)
+  const isEOL = isNodeEOL(version, scheduleJson)
+
   if (isEOL) {
     return true
   }
 
-  const coreIndex = await getJson(STORE.security)
-  const list = getVulnerabilityList(version, coreIndex, platform)
+  const securityJson = await getJson(STORE.security)
+  const list = getVulnerabilityList(version, securityJson, platform)
+
   return list.length > 0
 }
 
