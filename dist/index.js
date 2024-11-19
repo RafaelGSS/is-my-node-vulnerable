@@ -5070,7 +5070,7 @@ async function getJson (obj) {
       if (!obj.etagValue || obj.eTagValue !== etag || !fs.existsSync(obj.jsonFile)) {
         obj.etagValue = etag
         fs.writeFileSync(obj.etagFile, etag)
-        debug('Creating local core.json')
+        debug(`Creating local ${obj.jsonFile} from upstream`)
         resolve(fetchJson(obj))
       } else {
         debug(`No updates from upstream. Getting a cached version: ${obj.jsonFile}`)
