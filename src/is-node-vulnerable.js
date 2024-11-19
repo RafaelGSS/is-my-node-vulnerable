@@ -5,10 +5,6 @@ const satisfies = require('semver/functions/satisfies')
 const isNodeEOL = require('./is-node-eol')
 const STORE = require('./store')
 
-async function readLocal (file) {
-  return require(file)
-}
-
 function debug (msg) {
   if (process.env.DEBUG) {
     console.debug(msg)
@@ -49,7 +45,7 @@ async function fetchJson (obj) {
       process.nextTick(() => { process.exit(1) })
     }).end()
   })
-  return readLocal(obj.jsonFile)
+  return require(obj.jsonFile)
 }
 
 async function getJson (obj) {
@@ -70,7 +66,7 @@ async function getJson (obj) {
         resolve(fetchJson(obj))
       } else {
         debug(`No updates from upstream. Getting a cached version: ${obj.jsonFile}`)
-        resolve(readLocal(obj.jsonFile))
+        resolve(require(obj.jsonFile))
       }
     }).on('error', (err) => {
       console.error(`Request to Github returned error ${err.message}. Aborting...`)
