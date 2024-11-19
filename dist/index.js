@@ -4954,11 +4954,10 @@ if (isNodeEOL(process.version)) {
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const STORE = __nccwpck_require__(2307)
-const fs = __nccwpck_require__(7147)
 
 function getVersionInfo (version, scheduleJson) {
   if (!scheduleJson) {
-    scheduleJson = JSON.parse(fs.readFileSync(STORE.schedule.jsonFile))
+    scheduleJson = require(STORE.schedule.jsonFile)
   }
 
   // Gets the version key, i.e. 'v0.12' for 'v0.12.18', or 'v12' for 'v12.22.12'

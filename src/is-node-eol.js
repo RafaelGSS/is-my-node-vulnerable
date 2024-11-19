@@ -1,9 +1,8 @@
 const STORE = require('./store')
-const fs = require('fs')
 
 function getVersionInfo (version, scheduleJson) {
   if (!scheduleJson) {
-    scheduleJson = JSON.parse(fs.readFileSync(STORE.schedule.jsonFile))
+    scheduleJson = require(STORE.schedule.jsonFile)
   }
 
   // Gets the version key, i.e. 'v0.12' for 'v0.12.18', or 'v12' for 'v12.22.12'
