@@ -58,7 +58,7 @@ async function getJson (obj) {
 
       res.on('data', () => {})
 
-      const { etag } = res.headers
+      const etag = JSON.stringify(res.headers).etag
       if (!obj.etagValue || obj.eTagValue !== etag || !fs.existsSync(obj.jsonFile)) {
         obj.etagValue = etag
         fs.writeFileSync(obj.etagFile, etag)
