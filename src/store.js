@@ -1,6 +1,8 @@
 const path = require('path')
 
-const CACHE_DIR = path.resolve('..', 'cache')
+const CACHE_DIR = (typeof __NCC__ !== 'undefined')
+  ? path.resolve('..', 'cache')
+  : path.join(__dirname, '..', 'cache')
 
 module.exports = {
   security: {

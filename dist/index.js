@@ -5179,7 +5179,9 @@ module.exports = {
 
 const path = __nccwpck_require__(1017)
 
-const CACHE_DIR = path.resolve('..', 'cache')
+const CACHE_DIR = (typeof __NCC__ !== 'undefined')
+  ? path.resolve('..', 'cache')
+  : path.join(__dirname, '..', 'cache')
 
 module.exports = {
   security: {
