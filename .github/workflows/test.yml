@@ -49,4 +49,4 @@ jobs:
 
       - name: Run test
         run: |
-          cd test && node setup-test.js
+          node setup-test.js

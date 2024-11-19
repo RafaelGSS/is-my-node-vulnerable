@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "build": "ncc build action.js -o dist",
-    "test": "npm run lint && cd test && node setup-test.js",
+    "test": "npm run lint && node setup-test.js",
     "lint": "standard"
   },
   "author": "RafaelGSS <rafael.nunu@hotmail.com>",
